@@ -1,42 +1,41 @@
 pipeline {
-    node "any"
-
-    parameters {
-
-    }
+    agent any
 
     environment {
         TERRAFORM_HOME = ""
-        AZURE_CLIENT_ID = ""
-        AZURE_CLIENT_SECRET = ""
-        AZURE_TENANT_ID = ""
-        AZURE_SUBSCRIPTION_ID = ""
     }   
 
     stages {
-        stage('GIT Checkout') {
+        stage('SCM Checkout') {
             steps {
-                sh "I'm in git stage1"
+                git 'https://github.com/iac-coder/resourcegroup.git'
             }
         }
         stage('Terraform init') {
             steps {
-                sh "I'm in git stage2" 
+                sh "terraform init" 
             }
         }
         stage('Terraform validate') {
             steps {
-                sh "I'm in git stage3"
+                sh "terraform validate"
             }
         }
         stage('Terraform plan') {
             steps {
-                sh "I'm in git stage4"
+                //sh "terraform remote config -backend=azurerm -backend-config="resource_group_name=rg_name" -backend-config="storage_account_name=storageacc_name" -backend-config="container_name=something" -backend-config="mystate.tfstate""
+                sh "terraform plan -out=execution.plan"
+            }
+        }
+        stage('Bummer') {
+            steps {
+                sh "echo 'do we really plan to have some artifactory upload here?"
             }
         }
         stage('Terraform apply') {
             steps {
-                sh "I'm in git stage5"
+                //sh "terraform remote config -backend=azurerm -backend-config="resource_group_name=rg_name" -backend-config="storage_account_name=storageacc_name" -backend-config="container_name=something" -backend-config="mystate.tfstate""
+                sh "terraform apply execution.plan --auto-approve"
             }
         }
     }
